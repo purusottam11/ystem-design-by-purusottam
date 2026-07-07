@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Design by Purusottam</title>
+<meta name="description" content="A curated library of system design notes — databases, caching, scaling, messaging, microservices, cloud — with Spring Boot implementations.">
+<style>
+  :root{
+    --paper:#FBF8F5;
+    --ink:#231F1C;
+    --muted:#6B615A;
+    --line:#E7DFD7;
+    --accent:#C7431F;
+    --accent-soft:#FBE9E2;
+    --amber:#C97A0A;
+    --amber-soft:#FCF1DE;
+    --blue:#2C5FBF;
+    --blue-soft:#E8EFFC;
+    --green:#1E8E5A;
+    --green-soft:#E4F5EC;
+    --red:#BE4040;
+    --red-soft:#FBEAEA;
+    --purple:#6E48B0;
+    --purple-soft:#F0EAFA;
+    --teal:#158D8D;
+    --teal-soft:#DFF1F1;
+    --code:#F2ECE6;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:Georgia,'Times New Roman',serif;
+    line-height:1.65;
+    font-size:17px;
+    min-height:100vh;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+  a{color:inherit;text-decoration:none}
+
+  /* ============ HEADER ============ */
+  header{padding:64px 0 40px;border-bottom:1px solid var(--line)}
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin-bottom:14px;
+  }
+  h1{
+    font-size:44px;
+    font-weight:400;
+    line-height:1.15;
+    letter-spacing:-.01em;
+  }
+  h1 b{color:var(--accent);font-weight:700}
+  header .sub{
+    margin-top:18px;
+    color:var(--muted);
+    max-width:640px;
+    font-size:17.5px;
+  }
+  header .meta{
+    margin-top:20px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--muted);
+    letter-spacing:.06em;
+  }
+  header .meta span{margin-right:18px}
+  header .meta b{color:var(--ink)}
+
+  /* ============ SEARCH ============ */
+  .searchbar{
+    margin:36px 0 12px;
+    position:relative;
+  }
+  .searchbar input{
+    width:100%;
+    font-family:Georgia,serif;
+    font-size:16px;
+    padding:14px 18px 14px 46px;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    background:#fff;
+    color:var(--ink);
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .searchbar input:focus{
+    outline:none;
+    border-color:var(--accent);
+    box-shadow:0 0 0 4px var(--accent-soft);
+  }
+  .searchbar svg{
+    position:absolute;
+    left:16px;top:50%;
+    transform:translateY(-50%);
+    width:20px;height:20px;
+    color:var(--muted);
+    pointer-events:none;
+  }
+  .empty-msg{
+    display:none;
+    text-align:center;
+    color:var(--muted);
+    font-style:italic;
+    padding:36px 20px;
+  }
+  .empty-msg.show{display:block}
+
+  /* ============ SECTIONS ============ */
+  main{padding:32px 0 64px}
+  .kicker{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--accent);
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    margin:24px 0 12px;
+  }
+
+  .cat{
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:14px;
+    margin-bottom:14px;
+    overflow:hidden;
+    transition:box-shadow .2s, border-color .2s;
+  }
+  .cat:hover{border-color:#D6CCC1;box-shadow:0 3px 12px rgba(35,31,28,.05)}
+  .cat.open{border-color:var(--accent);box-shadow:0 4px 18px rgba(199,67,31,.10)}
+
+  .cat-head{
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    padding:20px 22px;
+    background:transparent;
+    border:none;
+    cursor:pointer;
+    text-align:left;
+    font-family:inherit;
+    color:inherit;
+    transition:background .15s;
+  }
+  .cat-head:hover{background:var(--paper)}
+  .cat-head:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+
+  .icon{
+    width:44px;height:44px;
+    flex-shrink:0;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+  }
+  .icon.db     {background:var(--blue-soft);   color:var(--blue)}
+  .icon.cache  {background:var(--red-soft);    color:var(--red)}
+  .icon.scale  {background:var(--green-soft);  color:var(--green)}
+  .icon.deleg  {background:var(--amber-soft);  color:var(--amber)}
+  .icon.conc   {background:var(--purple-soft); color:var(--purple)}
+  .icon.comm   {background:var(--teal-soft);   color:var(--teal)}
+  .icon.micro  {background:var(--accent-soft); color:var(--accent)}
+  .icon.cloud  {background:#EAEDF3;            color:#4A5A7A}
+
+  .cat-title{flex:1;min-width:0}
+  .cat-title h2{
+    font-size:22px;
+    font-weight:700;
+    line-height:1.25;
+    margin:0;
+    letter-spacing:-.005em;
+  }
+  .cat-title p{
+    font-size:14.5px;
+    color:var(--muted);
+    margin:4px 0 0;
+    line-height:1.45;
+  }
+  .cat-count{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    background:var(--code);
+    padding:4px 10px;
+    border-radius:20px;
+    flex-shrink:0;
+  }
+  .cat.open .cat-count{background:var(--accent-soft);color:var(--accent)}
+
+  .chev{
+    width:22px;height:22px;
+    flex-shrink:0;
+    color:var(--muted);
+    transition:transform .25s ease, color .2s;
+  }
+  .cat.open .chev{transform:rotate(180deg);color:var(--accent)}
+
+  /* body */
+  .cat-body{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease;
+  }
+  .cat.open .cat-body{max-height:2000px}
+  .cat-body-inner{
+    padding:4px 22px 20px 84px;
+    border-top:1px dashed var(--line);
+    margin-top:-1px;
+  }
+  @media (max-width:600px){
+    .cat-body-inner{padding-left:22px}
+  }
+
+  .doc{
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
+    padding:14px 0;
+    border-bottom:1px dotted var(--line);
+    color:var(--ink);
+    transition:transform .15s;
+  }
+  .doc:last-child{border-bottom:none;padding-bottom:6px}
+  .doc:hover{transform:translateX(4px)}
+  .doc .dot{
+    width:8px;height:8px;
+    border-radius:50%;
+    background:var(--accent);
+    margin-top:9px;
+    flex-shrink:0;
+    transition:transform .15s;
+  }
+  .doc:hover .dot{transform:scale(1.3)}
+  .doc-body{flex:1;min-width:0}
+  .doc-title{
+    font-size:16.5px;
+    font-weight:700;
+    line-height:1.35;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .doc-title .arrow{
+    font-family:var(--mono);
+    font-size:14px;
+    color:var(--accent);
+    opacity:0;
+    transform:translateX(-4px);
+    transition:opacity .15s, transform .15s;
+  }
+  .doc:hover .doc-title .arrow{opacity:1;transform:translateX(0)}
+  .doc-desc{
+    font-size:14.5px;
+    color:var(--muted);
+    margin-top:3px;
+    line-height:1.5;
+  }
+
+  .empty-cat{
+    padding:14px 0 6px;
+    color:var(--muted);
+    font-style:italic;
+    font-size:15px;
+  }
+  .empty-cat span{
+    font-family:var(--mono);
+    font-style:normal;
+    font-size:12px;
+    background:var(--code);
+    padding:2px 8px;
+    border-radius:4px;
+    margin-left:6px;
+    color:var(--amber);
+  }
+
+  /* controls under search */
+  .controls{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:16px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--muted);
+  }
+  .controls button{
+    background:none;
+    border:none;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--accent);
+    cursor:pointer;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:4px 8px;
+    border-radius:4px;
+    transition:background .15s;
+  }
+  .controls button:hover{background:var(--accent-soft)}
+  .controls .count b{color:var(--ink)}
+
+  /* footer */
+  footer{
+    padding:32px 0 40px;
+    border-top:1px solid var(--line);
+    color:var(--muted);
+    font-size:14px;
+  }
+  footer .wrap{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  footer .mono{font-family:var(--mono);font-size:12px;letter-spacing:.06em}
+
+  /* responsive */
+  @media (max-width:600px){
+    h1{font-size:32px}
+    header{padding:44px 0 32px}
+    .cat-head{padding:16px 18px;gap:14px}
+    .icon{width:38px;height:38px;font-size:19px}
+    .cat-title h2{font-size:19px}
+    .cat-count{display:none}
+  }
+</style>
+</head>
+<body>
+
+<header><div class="wrap">
+  <div class="eyebrow">A personal library · Notes &amp; implementations</div>
+  <h1><b>System Design</b> by Purusottam</h1>
+  <p class="sub">A growing collection of deep-dive notes on the concepts real backend systems are built on — from database internals to distributed messaging — each paired with a hands-on Spring Boot implementation.</p>
+  <div class="meta">
+    <span>Updated <b>July 2026</b></span>
+    <span><b id="stat-cats">8</b> categories</span>
+    <span><b id="stat-docs">4</b> guides · more soon</span>
+  </div>
+</div></header>
+
+<main><div class="wrap">
+
+  <div class="searchbar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="7"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    <input id="searchInput" type="text" placeholder="Search for a topic — Kafka, MongoDB, transactions, sharding…" autocomplete="off" spellcheck="false">
+  </div>
+
+  <div class="controls">
+    <span class="count">Showing <b id="visibleCount">8</b> of 8 categories</span>
+    <span>
+      <button onclick="expandAll()">Expand all</button>
+      <button onclick="collapseAll()">Collapse all</button>
+    </span>
+  </div>
+
+  <div class="kicker">Browse by area</div>
+
+  <div id="empty" class="empty-msg">No topics match your search. Try a different word.</div>
+
+  <div id="cats">
+    <!-- ============ DATABASE ============ -->
+    <div class="cat" data-name="Database" data-keywords="database db mongodb dynamodb sql nosql cassandra storage internals sharding replication">
+      <button class="cat-head" onclick="toggle(this)" aria-expanded="false">
+        <div class="icon db">◆</div>
+        <div class="cat-title">
+          <h2>Database</h2>
+          <p>Storage engines, indexing, sharding, replication, transactions — how databases really work under the hood.</p>
+        </div>
+        <span class="cat-count">2 guides</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="cat-body"><div class="cat-body-inner">
+        <a class="doc" href="https://purusottam11.github.io/mongodb-internals-and-spring-boot-implementation" target="_blank" rel="noopener">
+          <div class="dot"></div>
+          <div class="doc-body">
+            <div class="doc-title">MongoDB Internals &amp; Spring Boot Implementation <span class="arrow">→</span></div>
+            <div class="doc-desc">Document model, WiredTiger, replica sets, sharding, transactions — with a full QuickBite Spring Boot build-out.</div>
+          </div>
+        </a>
+        <a class="doc" href="https://purusottam11.github.io/dynamoDb-internals-and-spring-boot-implementation/" target="_blank" rel="noopener">
+          <div class="dot"></div>
+          <div class="doc-body">
+            <div class="doc-title">DynamoDB Internals &amp; Spring Boot Implementation <span class="arrow">→</span></div>
+            <div class="doc-desc">Partition keys, GSIs, capacity modes, streams, single-table design — with a ShopSwift e-commerce Spring Boot capstone.</div>
+          </div>
+        </a>
+      </div></div>
+    </div>
+
+    <!-- ============ CACHING ============ -->
+    <div class="cat" data-name="Caching" data-keywords="caching cache redis memcached cdn ttl eviction lru">
+      <button class="cat-head" onclick="toggle(this)" aria-expanded="false">
+        <div class="icon cache">◉</div>
+        <div class="cat-title">
+          <h2>Caching</h2>
+          <p>Redis, CDN edges, cache-aside vs write-through, invalidation strategies, and how caches change latency budgets.</p>
+        </div>
+        <span class="cat-count">Coming soon</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="cat-body"><div class="cat-body-inner">
+        <div class="empty-cat">Guides for this area are on the way. <span>WIP</span></div>
+      </div></div>
+    </div>
+
+    <!-- ============ SCALING ============ -->
+    <div class="cat" data-name="Scaling" data-keywords="scaling horizontal vertical load balancer sharding partitioning capacity">
+      <button class="cat-head" onclick="toggle(this)" aria-expanded="false">
+        <div class="icon scale">▲</div>
+        <div class="cat-title">
+          <h2>Scaling</h2>
+          <p>Horizontal vs vertical scaling, load balancers, partitioning, capacity planning, and the P99 latency mindset.</p>
+        </div>
+        <span class="cat-count">Coming soon</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="cat-body"><div class="cat-body-inner">
+        <div class="empty-cat">Guides for this area are on the way. <span>WIP</span></div>
+      </div></div>
+    </div>
+
+    <!-- ============ DELEGATION ============ -->
+    <div class="cat" data-name="Delegation" data-keywords="delegation messaging queue kafka rabbitmq event streaming pub sub broker">
+      <button class="cat-head" onclick="toggle(this)" aria-expanded="false">
+        <div class="icon deleg">↯</div>
+        <div class="cat-title">
+          <h2>Delegation</h2>
+          <p>Message brokers, event streaming, task queues — offloading work from the request path to keep systems fast and decoupled.</p>
+        </div>
+        <span class="cat-count">1 guide</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="cat-body"><div class="cat-body-inner">
+        <a class="doc" href="https://purusottam11.github.io/apache-kafka-internals-and-spring-boot-implementation" target="_blank" rel="noopener">
+          <div class="dot"></div>
+          <div class="doc-body">
+            <div class="doc-title">Apache Kafka Internals &amp; Spring Boot Implementation <span class="arrow">→</span></div>
+            <div class="doc-desc">Brokers, partitions, consumer groups, exactly-once, DLT, Streams, Schema Registry — with a full QuickBite event platform build-out.</div>
+          </div>
+        </a>
+      </div></div>
+    </div>
+
+    <!-- ============ CONCURRENCY ============ -->
+    <div class="cat" data-name="Concurrency" data-keywords="concurrency threads locks synchronization race conditions parallelism">
+      <button class="cat-head" onclick="toggle(this)" aria-expanded="false">
+        <div class="icon conc">∞</div>
+        <div class="cat-title">
+          <h2>Concurrency</h2>
+          <p>Threads, locks, atomics, race conditions, and the JVM concurrency primitives every backend engineer runs into.</p>
+        </div>
+        <span class="cat-count">Coming soon</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="cat-body"><div class="cat-body-inner">
+        <div class="empty-cat">Guides for this area are on the way. <span>WIP</span></div>
+      </div></div>
+    </div>
+
+    <!-- ============ COMMUNICATION ============ -->
+    <div class="cat" data-name="Communication" data-keywords="communication rest grpc graphql http websockets protocols apis">
+      <button class="cat-head" onclick="toggle(this)" aria-expanded="false">
+        <div class="icon comm">⇄</div>
+        <div class="cat-title">
+          <h2>Communication</h2>
+          <p>REST, gRPC, GraphQL, WebSockets — how services talk, and when each protocol is the right choice.</p>
+        </div>
+        <span class="cat-count">Coming soon</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="cat-body"><div class="cat-body-inner">
+        <div class="empty-cat">Guides for this area are on the way. <span>WIP</span></div>
+      </div></div>
+    </div>
+
+    <!-- ============ MICROSERVICES ============ -->
+    <div class="cat" data-name="Microservices" data-keywords="microservices patterns saga circuit breaker service discovery kubernetes design">
+      <button class="cat-head" onclick="toggle(this)" aria-expanded="false">
+        <div class="icon micro">▦</div>
+        <div class="cat-title">
+          <h2>Microservices</h2>
+          <p>Design patterns for splitting a system into services — sagas, circuit breakers, discovery, outbox — and when NOT to.</p>
+        </div>
+        <span class="cat-count">1 guide</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="cat-body"><div class="cat-body-inner">
+        <a class="doc" href="https://purusottam11.github.io/Microservices-Design-Pattern/" target="_blank" rel="noopener">
+          <div class="dot"></div>
+          <div class="doc-body">
+            <div class="doc-title">Microservices Design Patterns <span class="arrow">→</span></div>
+            <div class="doc-desc">The core patterns interview panels and production systems care about — Circuit Breaker, Saga, Outbox, Service Discovery, and more.</div>
+          </div>
+        </a>
+      </div></div>
+    </div>
+
+    <!-- ============ CLOUD ============ -->
+    <div class="cat" data-name="Cloud (AWS &amp; Azure)" data-keywords="cloud aws azure ec2 s3 lambda vpc iam terraform devops infrastructure">
+      <button class="cat-head" onclick="toggle(this)" aria-expanded="false">
+        <div class="icon cloud">☁</div>
+        <div class="cat-title">
+          <h2>Cloud (AWS &amp; Azure)</h2>
+          <p>Core services, networking, IAM, cost, and infrastructure-as-code — for engineers who ship on the two big clouds.</p>
+        </div>
+        <span class="cat-count">Coming soon</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="cat-body"><div class="cat-body-inner">
+        <div class="empty-cat">Guides for this area are on the way. <span>WIP</span></div>
+      </div></div>
+    </div>
+
+  </div>
+
+</div></main>
+
+<footer><div class="wrap">
+  <span>© 2026 · Purusottam Mohapatra</span>
+  <span class="mono">Built for learners · Notes are living documents</span>
+</div></footer>
+
+<script>
+  // ============ ACCORDION ============
+  function toggle(head){
+    const cat = head.parentElement;
+    const wasOpen = cat.classList.contains('open');
+    cat.classList.toggle('open');
+    head.setAttribute('aria-expanded', String(!wasOpen));
+  }
+
+  function expandAll(){
+    document.querySelectorAll('.cat').forEach(c => {
+      if (c.style.display !== 'none') {
+        c.classList.add('open');
+        c.querySelector('.cat-head').setAttribute('aria-expanded','true');
+      }
+    });
+  }
+  function collapseAll(){
+    document.querySelectorAll('.cat').forEach(c => {
+      c.classList.remove('open');
+      c.querySelector('.cat-head').setAttribute('aria-expanded','false');
+    });
+  }
+
+  // ============ SEARCH ============
+  const input = document.getElementById('searchInput');
+  const cats = document.querySelectorAll('.cat');
+  const empty = document.getElementById('empty');
+  const visibleCount = document.getElementById('visibleCount');
+
+  function normalize(s){ return (s || '').toLowerCase().trim(); }
+
+  function runSearch(){
+    const q = normalize(input.value);
+    let shown = 0;
+
+    cats.forEach(cat => {
+      const name = normalize(cat.dataset.name);
+      const keywords = normalize(cat.dataset.keywords);
+      // also match against inner doc titles/descriptions
+      const inner = normalize(cat.querySelector('.cat-body-inner').innerText);
+
+      const matches = !q || name.includes(q) || keywords.includes(q) || inner.includes(q);
+
+      if (matches){
+        cat.style.display = '';
+        shown++;
+        // auto-expand on non-empty search so the match is visible
+        if (q){
+          cat.classList.add('open');
+          cat.querySelector('.cat-head').setAttribute('aria-expanded','true');
+        }
+      } else {
+        cat.style.display = 'none';
+        cat.classList.remove('open');
+        cat.querySelector('.cat-head').setAttribute('aria-expanded','false');
+      }
+    });
+
+    visibleCount.textContent = shown;
+    empty.classList.toggle('show', shown === 0);
+  }
+
+  input.addEventListener('input', runSearch);
+
+  // Clear search with Escape
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Escape'){ input.value = ''; runSearch(); input.blur(); }
+  });
+
+  // ============ STATS ============
+  document.getElementById('stat-cats').textContent = cats.length;
+  const totalDocs = document.querySelectorAll('.doc').length;
+  document.getElementById('stat-docs').textContent = totalDocs;
+</script>
+
+</body>
+</html>
