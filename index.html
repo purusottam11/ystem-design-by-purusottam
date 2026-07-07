@@ -168,6 +168,7 @@
   .icon.comm   {background:var(--teal-soft);   color:var(--teal)}
   .icon.micro  {background:var(--accent-soft); color:var(--accent)}
   .icon.cloud  {background:#EAEDF3;            color:#4A5A7A}
+  .icon.devops {background:#E1EEF7;            color:#1F6FB6}
 
   .cat-title{flex:1;min-width:0}
   .cat-title h2{
@@ -344,7 +345,7 @@
   <p class="sub">A growing collection of deep-dive notes on the concepts real backend systems are built on — from database internals to distributed messaging — each paired with a hands-on Spring Boot implementation.</p>
   <div class="meta">
     <span>Updated <b>July 2026</b></span>
-    <span><b id="stat-cats">8</b> categories</span>
+    <span><b id="stat-cats">9</b> categories</span>
     <span><b id="stat-docs">4</b> guides · more soon</span>
   </div>
 </div></header>
@@ -360,7 +361,7 @@
   </div>
 
   <div class="controls">
-    <span class="count">Showing <b id="visibleCount">8</b> of 8 categories</span>
+    <span class="count">Showing <b id="visibleCount">9</b> of 9 categories</span>
     <span>
       <button onclick="expandAll()">Expand all</button>
       <button onclick="collapseAll()">Collapse all</button>
@@ -506,6 +507,22 @@
             <div class="doc-desc">The core patterns interview panels and production systems care about — Circuit Breaker, Saga, Outbox, Service Discovery, and more.</div>
           </div>
         </a>
+      </div></div>
+    </div>
+
+    <!-- ============ DOCKER & KUBERNETES ============ -->
+    <div class="cat" data-name="Docker &amp; Kubernetes" data-keywords="docker kubernetes k8s containers pods deployments services helm ingress orchestration devops">
+      <button class="cat-head" onclick="toggle(this)" aria-expanded="false">
+        <div class="icon devops">⎈</div>
+        <div class="cat-title">
+          <h2>Docker &amp; Kubernetes</h2>
+          <p>Containers, images, pods, deployments, services, and ingress — packaging apps once and running them the same way everywhere.</p>
+        </div>
+        <span class="cat-count">Coming soon</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="cat-body"><div class="cat-body-inner">
+        <div class="empty-cat">Guides for this area are on the way. <span>WIP</span></div>
       </div></div>
     </div>
 
